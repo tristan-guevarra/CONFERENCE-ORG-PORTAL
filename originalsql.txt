@@ -1,0 +1,203 @@
+DROP DATABASE IF EXISTS conferenceDB;
+CREATE DATABASE conferenceDB;
+USE conferenceDB;
+
+-- Creating the Committee table
+CREATE TABLE Committee (
+    committeeID INT NOT NULL PRIMARY KEY
+);
+
+-- Creating the SubCommittee table
+CREATE TABLE SubCommittee (
+    subCommitteeID INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    committeeID INT NOT NULL,
+    PRIMARY KEY (subCommitteeID),
+    FOREIGN KEY (committeeID) REFERENCES Committee(committeeID) ON DELETE CASCADE
+);
+
+-- Creating Members
+CREATE TABLE Member (
+    memberID INT NOT NULL PRIMARY KEY,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Chair table
+CREATE TABLE Chair (
+    chairID INT NOT NULL PRIMARY KEY,
+    memberID INT NOT NULL,
+    FOREIGN KEY (memberID) REFERENCES Member(memberID) ON DELETE CASCADE
+);
+
+-- CommitteeMembership table
+CREATE TABLE CommitteeMembership (
+    committeeID INT NOT NULL,
+    subCommitteeName VARCHAR(255) NOT NULL,
+    chairID INT NOT NULL,
+    memberID INT NOT NULL,
+    PRIMARY KEY (committeeID, subCommitteeName, memberID),
+    FOREIGN KEY (committeeID) REFERENCES Committee(committeeID) ON DELETE CASCADE,
+    FOREIGN KEY (chairID) REFERENCES Chair(chairID) ON DELETE CASCADE,
+    FOREIGN KEY (memberID) REFERENCES Member(memberID) ON DELETE CASCADE
+);
+
+-- Attendee table
+CREATE TABLE Attendee (
+    attendeeID INT NOT NULL PRIMARY KEY,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Hotel table
+CREATE TABLE Hotel (
+    roomNumber INT NOT NULL,
+    beds INT NOT NULL,
+    PRIMARY KEY (roomNumber)
+);
+
+-- Student table
+CREATE TABLE Student (
+    studentID INT NOT NULL PRIMARY KEY,
+    attendeeID INT NOT NULL,
+    roomNumber INT,
+    FOREIGN KEY (attendeeID) REFERENCES Attendee(attendeeID) ON DELETE CASCADE,
+    FOREIGN KEY (roomNumber) REFERENCES Hotel(roomNumber) ON DELETE SET NULL
+);
+
+-- Session table
+CREATE TABLE Session (
+    sessionID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    roomNumber INT NOT NULL,
+    startTime TIME NOT NULL,
+    endTime TIME NOT NULL,
+    topic VARCHAR(255) NOT NULL,
+    speakerID INT NOT NULL,
+    FOREIGN KEY (speakerID) REFERENCES Attendee(attendeeID) ON DELETE CASCADE
+);
+
+-- Professional table
+CREATE TABLE Professional (
+    professionalID INT NOT NULL PRIMARY KEY,
+    attendeeID INT NOT NULL,
+    FOREIGN KEY (attendeeID) REFERENCES Attendee(attendeeID) ON DELETE CASCADE
+);
+
+-- SponsoringCompany table
+CREATE TABLE SponsoringCompany (
+    companyID INT NOT NULL PRIMARY KEY,
+    NumOfEmails INT NOT NULL,
+    companyStatus VARCHAR(50) NOT NULL
+);
+
+-- Sponsor table
+CREATE TABLE Sponsor (
+    sponsorID INT NOT NULL PRIMARY KEY,
+    attendeeID INT NOT NULL,
+    companyID INT NOT NULL,
+    FOREIGN KEY (attendeeID) REFERENCES Attendee(attendeeID) ON DELETE CASCADE,
+    FOREIGN KEY (companyID) REFERENCES SponsoringCompany(companyID) ON DELETE CASCADE
+);
+
+-- JobPost table
+CREATE TABLE JobPost (
+    jobID INT NOT NULL PRIMARY KEY,
+    companyID INT NOT NULL,
+    jobTitle VARCHAR(255) NOT NULL,
+    jobCity VARCHAR(255) NOT NULL,
+    jobProvince VARCHAR(255) NOT NULL,
+    jobPay INT NOT NULL,
+    FOREIGN KEY (companyID) REFERENCES SponsoringCompany(companyID) ON DELETE CASCADE
+);
+
+-- Insert sample data
+
+INSERT INTO Committee (committeeID) VALUES (1), (2), (3), (4), (5), (6);
+
+INSERT INTO SubCommittee (name, committeeID) VALUES
+('Program Committee', 1), ('Logistics Committee', 1), ('Registration Committee', 1),
+('Program Committee', 2), ('Finance Committee', 2), ('Marketing Committee', 2),
+('Program Committee', 3), ('Finance Committee', 3), ('Sponsorship Committee', 3),
+('Program Committee', 4), ('Event Planning Committee', 4),
+('Program Committee', 5), ('Finance Committee', 5), ('Registration Committee', 5), ('Marketing Committee', 5),
+('Program Committee', 6), ('Transportation Committee', 6), ('Security Committee', 6);
+
+INSERT INTO Member (memberID, firstName, lastName, email) VALUES
+(1, 'Olivia', 'Rodrigo', 'olivia.rodrigo@gmail.com'),
+(2, 'Gracie', 'Abrams', 'gracie.abrams@gmail.com'),
+(3, 'Billie', 'Eilish', 'billie.eilish@gmail.com'),
+(4, 'Bea', 'Badobee', 'bea.badobee@gmail.com'),
+(5, 'Ariana', 'Grande', 'ariana.grande@gmail.com'),
+(6, 'Grent', 'Perez', 'grent.perez@gmail.com');
+
+INSERT INTO Chair (chairID, memberID) VALUES (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6);
+
+INSERT INTO CommitteeMembership (committeeID, subCommitteeName, chairID, memberID) VALUES
+(1, 'Program Committee', 1, 1),
+(1, 'Logistics Committee', 2, 2),
+(1, 'Registration Committee', 3, 3),
+(2, 'Program Committee', 4, 4),
+(2, 'Finance Committee', 5, 5),
+(2, 'Marketing Committee', 6, 6),
+(3, 'Program Committee', 1, 1),
+(3, 'Finance Committee', 2, 2),
+(3, 'Sponsorship Committee', 3, 3);
+
+INSERT INTO Attendee (attendeeID, firstName, lastName, email) VALUES
+(1, 'Tristan', 'Guevarra', 'tristan.guevarra@student.com'),
+(2, 'Student', '1', 's1@student.com'),
+(3, 'Student', '2', 's2@student.com'),
+(4, 'Student', '3', 's3@student.com'),
+(5, 'Student', '4', 's4@student.com'),
+(6, 'Student', '5', 's5@student.com'),
+(7, 'Lebron', 'James', 'lebron.james@celebrity.com'),
+(8, 'Stephen', 'Curry', 'stephen.curry@celebrity.com'),
+(9, 'Matt', 'Bennett', 'matt.bennett@celebrity.com'),
+(10, 'Jayson', 'Tatum', 'jayson.tatum@celebrity.com'),
+(11, 'Bronny', 'JamesJr', 'bronny.jamesjr@celebrity.com'),
+(12, 'Vince', 'Carter', 'vince.carter@celebrity.com'),
+(13, 'Zendaya', 'Carter', 'zendaya.carter@business.com'),
+(14, 'Elon', 'Musk', 'elon.musk@business.com'),
+(15, 'Bill', 'Gates', 'bill.gates@business.com'),
+(16, 'Jalen', 'Green', 'jalen.green@business.com'),
+(17, 'Jalen', 'Brown', 'jalen.brown@business.com'),
+(18, 'Josh', 'Christopher', 'josh.christopher@business.com');
+
+INSERT INTO Hotel (roomNumber, beds) VALUES 
+(201, 1), (202, 2), (203, 3), (204, 1), (205, 2), (206, 3);
+
+INSERT INTO Student (studentID, attendeeID, roomNumber) VALUES
+(1, 1, 201), (2, 2, 202), (3, 3, 203), (4, 4, 204), (5, 5, 205), (6, 6, 201);
+
+INSERT INTO Session (roomNumber, startTime, endTime, topic, speakerID) VALUES
+(101, '08:00', '09:30', 'Database Management Systems', 7),
+(102, '10:00', '10:30', 'ER Models', 8),
+(103, '11:00', '11:30', 'Relational Model and Data Definition', 9),
+(104, '12:00', '12:30', 'ER to Relational', 10),
+(105, '13:00', '14:00', 'Midterm Preparation', 11),
+(106, '15:30', '17:00', '12 Week Crash Course', 12);
+
+INSERT INTO Professional (professionalID, attendeeID) VALUES
+(7, 7), (8, 8), (9, 9), (10, 10), (11, 11), (12, 12);
+
+INSERT INTO SponsoringCompany (companyID, NumOfEmails, companyStatus) VALUES
+(101, 0, 'Bronze'),
+(102, 4, 'Gold'),
+(103, 5, 'Platinum'),
+(104, 0, 'Bronze'),
+(105, 0, 'Bronze'),
+(106, 5, 'Platinum');
+
+INSERT INTO Sponsor (sponsorID, attendeeID, companyID) VALUES 
+(31, 13, 101), (32, 14, 102), (33, 15, 103),
+(34, 16, 104), (35, 17, 105), (36, 18, 106);
+
+INSERT INTO JobPost (jobID, companyID, jobTitle, jobCity, jobProvince, jobPay) VALUES
+(1, 101, 'Software Designer', 'Collingwood', 'Ontario', 140000),
+(2, 102, 'FPGA Soft Tool Developer', 'Hamilton', 'Ontario', 100000),
+(3, 103, 'Meter Developer Software', 'Markham', 'Ontario', 180000),
+(4, 104, 'Software Development Engineer II', 'Toronto', 'Ontario', 120000),
+(5, 105, 'SP Engineer', 'Mississauga', 'Ontario', 165000),
+(6, 106, 'Software Developer MDA', 'Brampton', 'Ontario', 110000);
